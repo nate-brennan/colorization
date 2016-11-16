@@ -54,14 +54,16 @@ loss = tf.sqrt(tf.reduce_sum(tf.square(tf.log(result + 1) - tf.log(output + 1)))
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
-input_image = tf.image.decode_jpeg('test.jpg', channels=1)
-output_image = tf.image.decode_jpeg('test.jpg', channels=3)
 with tf.Session() as sess:
 	sess.run(tf.initialize_all_variables())
-	for i in range(10):
-		train_loss, _ = sess.run([loss, train_step], feed_dict={input: input_image, output: output_image, keep_prob: .5})
 
-sess.run(loss, feed_dict={input: input_image, keep_prob:1})
+	input_image = tf.image.decode_png(tf.read_file('biden-obama.png'), channels=1).eval()
+	output_image = tf.image.decode_png(tf.read_file('biden-obama.png'), channels=3).eval()
+
+	for i in range(10):
+		train_loss, _ = sess.run([loss, train_step], feed_dict={input: [input_image], output: [output_image], keep_prob: .5})
+
+	sess.run(loss, feed_dict={input: [input_image], output: [output_image], keep_prob: 1})
 
 
 
