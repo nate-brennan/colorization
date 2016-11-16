@@ -51,4 +51,11 @@ W_fc2 = weight_variable([1024, 3])
 b_fc2 = bias_variable([3])
 result = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
-loss = 
+loss = tf.sqrt(tf.reduce_sum(tf.square(tf.log(result + 1) - tf.log(output + 1)))/3)
+
+train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+
+
+
+
+
