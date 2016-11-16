@@ -2,11 +2,10 @@ import tensorflow as tf
 
 learning_rate = 10**-4
 
-
 # I'm assuming we will resize all images to the same size
 # tf.image.resize_images
-img_h = ???
-img_w = ???
+img_h = 256
+img_w = 256
 
 def weight_variable(shape):
   return tf.Variable(tf.truncated_normal(shape, stddev=0.1))
@@ -20,8 +19,8 @@ def conv2d(input, filter):
 def max_pool_2x2(input):
   return tf.nn.max_pool(input, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-input = tf.placeholder(tf.int32, [None, img_h * img_w])
-output = tf.placeholder(tf.int32, [None, img_h * img_w, 3])
+input = tf.placeholder(tf.int32, [None, img_h, img_w, 1])
+output = tf.placeholder(tf.int32, [None, img_h, img_w, 3])
 
 # first convolutional layer
 W_conv1 = weight_variable([5, 5, 1, 32])
@@ -54,6 +53,16 @@ result = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 loss = tf.sqrt(tf.reduce_sum(tf.square(tf.log(result + 1) - tf.log(output + 1)))/3)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+
+input_image = tf.image.decode_jpeg('test.jpg', channels=1)
+output_image = tf.image.decode_jpeg('test.jpg', channels=3)
+with tf.Session() as sess:
+	sess.run(tf.initialize_all_variables())
+	for i in range(10):
+		
+		train_loss, _ = sess.run([loss, train_step], feed_dict={input: input_image, output: output_image, keep_prob: .5})
+
+sess.run(loss, feed_dict={input: input_image, keep_prob:1})
 
 
 
