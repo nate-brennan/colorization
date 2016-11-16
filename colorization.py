@@ -50,7 +50,7 @@ W_fc2 = weight_variable([1024, 3])
 b_fc2 = bias_variable([3])
 result = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
-loss = tf.sqrt(tf.reduce_sum(tf.square(tf.log(result + 1) - tf.log(output + 1)))/3)
+loss = tf.reduce_sum(tf.log(tf.abs(result - output)))
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
@@ -60,10 +60,12 @@ with tf.Session() as sess:
 	input_image = tf.image.decode_png(tf.read_file('biden-obama.png'), channels=1).eval()
 	output_image = tf.image.decode_png(tf.read_file('biden-obama.png'), channels=3).eval()
 
-	for i in range(10):
+	for i in range(1000):
 		train_loss, _ = sess.run([loss, train_step], feed_dict={input: [input_image], output: [output_image], keep_prob: .5})
+		print(train_loss)
 
-	sess.run(loss, feed_dict={input: [input_image], output: [output_image], keep_prob: 1})
+	test_loss = sess.run(loss, feed_dict={input: [input_image], output: [output_image], keep_prob: 1})
+	print(test_loss)
 
 
 
