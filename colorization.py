@@ -19,8 +19,8 @@ def conv2d(input, filter):
 def max_pool_2x2(input):
   return tf.nn.max_pool(input, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-input = tf.placeholder(tf.int32, [None, img_h, img_w, 1])
-output = tf.placeholder(tf.int32, [None, img_h, img_w, 3])
+input = tf.placeholder(tf.float32, [None, img_h, img_w, 1])
+output = tf.placeholder(tf.float32, [None, img_h, img_w, 3])
 
 # first convolutional layer
 W_conv1 = weight_variable([5, 5, 1, 32])
@@ -59,7 +59,6 @@ output_image = tf.image.decode_jpeg('test.jpg', channels=3)
 with tf.Session() as sess:
 	sess.run(tf.initialize_all_variables())
 	for i in range(10):
-		
 		train_loss, _ = sess.run([loss, train_step], feed_dict={input: input_image, output: output_image, keep_prob: .5})
 
 sess.run(loss, feed_dict={input: input_image, keep_prob:1})
