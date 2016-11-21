@@ -1,6 +1,8 @@
 import tensorflow as tf
+import numpy as np
+from IPython.display import Image, display
 
-learning_rate = 10**-4
+learning_rate = 1e-3
 
 # I'm assuming we will resize all images to the same size
 # tf.image.resize_images
@@ -18,6 +20,9 @@ def conv2d(input, filter):
 
 def max_pool_2x2(input):
   return tf.nn.max_pool(input, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
+def encode(tensor):
+	return tf.image.encode_png(tf.cast(tensor, dtype=tf.uint8).eval()[0]).eval()
 
 input = tf.placeholder(tf.float32, [None, img_h, img_w, 1])
 output = tf.placeholder(tf.float32, [None, img_h, img_w, 3])
@@ -46,11 +51,13 @@ keep_prob = tf.placeholder(tf.float32)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
 # second feed forward
-W_fc2 = weight_variable([1024, 3])
-b_fc2 = bias_variable([3])
-result = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+W_fc2 = weight_variable([1024, img_h/4 * img_w/4 * 3])
+b_fc2 = bias_variable([img_h/4 * img_w/4 * 3])
+result_1D = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+result_small = tf.reshape(result_1D, [-1, img_h/4, img_w/4, 3])
+result = tf.image.resize_images(result_small, img_h, img_w)
 
-loss = tf.reduce_sum(tf.log(tf.abs(result - output)))
+loss = tf.reduce_sum(tf.log(tf.abs(result - output) + 1))
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
@@ -60,13 +67,14 @@ with tf.Session() as sess:
 	input_image = tf.image.decode_png(tf.read_file('biden-obama.png'), channels=1).eval()
 	output_image = tf.image.decode_png(tf.read_file('biden-obama.png'), channels=3).eval()
 
-	for i in range(1000):
+	for i in range(10):
 		train_loss, _ = sess.run([loss, train_step], feed_dict={input: [input_image], output: [output_image], keep_prob: .5})
 		print(train_loss)
 
-	test_loss = sess.run(loss, feed_dict={input: [input_image], output: [output_image], keep_prob: 1})
+	test_loss, test_result = sess.run([loss,result], feed_dict={input: [input_image], output: [output_image], keep_prob: 1})
 	print(test_loss)
-
+	with open('result.png', 'w') as f:
+		f.write(encode(test_result))
 
 
 
