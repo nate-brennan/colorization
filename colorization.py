@@ -22,18 +22,29 @@ conv_size_1 = 32
 conv_size_2 = 32
 conv_size_3 = 32
 hidden_size = 1
+input_layer = tf.reshape(input, [-1,img_h,img_w,1])
+
+
+
+def conv_layer(sizes, stride_limit=2):
+        h_conv = input_layer
+        for i in range(1,len(sizes)):
+                W_conv = weight_variable([filter_size, filter_size, sizes[i-1], sizes[i]])
+                b_conv = bias_variable([sizes[i]])
+                if i<=stride_limit:
+                        h_conv = tf.nn.relu(tf.nn.conv2d(h_conv, W_conv, strides=[1, 2, 2, 1], padding='SAME') + b_conv)
+                else:
+                        h_conv = tf.nn.relu(tf.nn.conv2d(h_conv, W_conv, strides=[1, 1, 1, 1], padding='SAME') + b_conv)
+        return h_conv
+
+
+
 
 # first convolutional layer
 W_conv1 = weight_variable([filter_size, filter_size, 1, conv_size_1])
 b_conv1 = bias_variable([conv_size_1])
 input_reshape = tf.reshape(input, [-1,img_h,img_w,1])
 h_conv1 = tf.nn.relu(tf.nn.conv2d(input_reshape, W_conv1, strides=[1,2,2,1], padding='SAME') + b_conv1)
-
-# W_conv2 = weight_variable([filter_size*2, filter_size, 1, conv_size_2])
-# b_conv1 = bias_variable([conv_size_1])
-# input_reshape = tf.reshape(input, [-1,img_h,img_w,1])
-# h_conv1 = tf.nn.relu(tf.nn.conv2d(input_reshape, W_conv1, strides=[1,2,2,1], padding='SAME') + b_conv1)
-
 
 
 
@@ -44,12 +55,12 @@ b_conv2 = bias_variable([conv_size_2])
 h_conv2 = tf.nn.relu(tf.nn.conv2d(h_conv1, W_conv2, strides=[1,2,2,1], padding='SAME') + b_conv2)
 
 
+#h_conv1 = conv_layer(32, input_layer)
+h_conv2 = conv_layer([1,32,32])
+
+
 result = tf.reshape(h_conv2, [-1, img_h, img_w, 3, 32])
 
-# # third convolutional layer
-# W_conv3 = weight_variable([filter_size, filter_size, conv_size_2, conv_size_3])
-# b_conv3 = bias_variable([conv_size_3])
-# h_conv3 = tf.nn.relu(tf.nn.conv2d(h_conv2, W_conv3, strides=[1,1,1,1], padding='SAME') + b_conv3)
 
 #first feed forward
 W_fc1 = weight_variable([img_h/2 * img_w/2 * conv_size_1, hidden_size])
