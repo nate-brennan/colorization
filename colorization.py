@@ -9,7 +9,7 @@ img_h = 64
 img_w = 64
 
 def weight_variable(shape):
-  return tf.Variable(tf.truncated_normal(shape, stddev=0.1))
+  return tf.Variable(tf.truncated_normal(shape, stddev=.1))
 
 def bias_variable(shape):
   return tf.Variable(tf.zeros(shape))
@@ -30,7 +30,7 @@ W_conv1 = weight_variable([filter_size, filter_size, 1, conv_size_1])
 b_conv1 = bias_variable([conv_size_1])
 h_conv1 = tf.nn.relu(tf.nn.conv2d(x, W_conv1, strides=[1,2,2,1], padding='SAME') + b_conv1)
 
-#  second convolutional layer
+# # second convolutional layer
 W_conv2 = weight_variable([filter_size, filter_size, conv_size_1, conv_size_2])
 b_conv2 = bias_variable([conv_size_2])
 h_conv2 = tf.nn.relu(tf.nn.conv2d(h_conv1, W_conv2, strides=[1,2,2,1], padding='SAME') + b_conv2)
@@ -72,7 +72,6 @@ train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)#, aggregation_
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
-
 with tf.Session(config=config) as sess:
         
         sess.run(tf.initialize_all_variables())
@@ -80,33 +79,38 @@ with tf.Session(config=config) as sess:
         # image = tf.read_file('turkeys/n01794344_17499.JPEG')
 
         # input_image = tf.image.decode_jpeg(image, channels=1)
-        # input_image = tf.image.resize_images(input_image, tf.constant([img_h, img_w]))
+        # input_image = tf.image.resize_images(input_image, img_h, img_w)
         # with open('input.jpeg', 'w') as f:
-                # f.write(tf.image.encode_jpeg(tf.cast(input_image, tf.uint8)).eval())
+        #         f.write(tf.image.encode_jpeg(tf.cast(input_image, tf.uint8)).eval())
         # input_image = input_image.eval()
+        # input_image = [input_image]
 
         # output_image = tf.image.decode_jpeg(image, channels=3)
-        # output_image = tf.image.resize_images(output_image, tf.constant([img_h, img_w]))
+        # output_image = tf.image.resize_images(output_image, output_h, output_w)
         # with open('output.jpeg', 'w') as f:
-                # f.write(tf.image.encode_jpeg(tf.cast(output_image, tf.uint8)).eval())
+        #         f.write(tf.image.encode_jpeg(tf.cast(output_image, tf.uint8)).eval())
         # output_image = output_image.eval()
+        # output_image = [output_image]
         # output_image //= 8
 
-        # feed_dict = {input: [input_image], output: [output_image], keep_prob: .5}
+        # input_image = [[[[85] for _ in range(256)] for _ in range(256)] for _ in range(10)]
+        # output_image = [[[[255, 0, 0] for _ in range(64)] for _ in range(64)] for _ in range(10)]
+
+        # feed_dict = {input: input_image, output: output_image, keep_prob: .5}
 
         # for i in range(25):
                 # train_loss, _ = sess.run([loss, train_step], feed_dict)
                 # print i, train_loss
 
         # test_result = sess.run(result, feed_dict)
-        # test_result = tf.reshape(test_result, [img_h * img_w * 3, 32])
+        # test_result = tf.reshape(test_result, [img_h * img_w * 3])
         # test_result = tf.nn.softmax(test_result)
         # test_result = tf.reshape(test_result, [img_h, img_w,  3, 32])
         # test_result = tf.argmax(test_result, 3)
         # test_result *= 8
         # test_result += 4
         # with open('result.jpeg', 'w') as f:
-                # f.write(tf.image.encode_jpeg(tf.cast(test_result, tf.uint8)).eval())
+        #         f.write(tf.image.encode_jpeg(tf.cast(test_result[0], tf.uint8)).eval())
 
         image_nums = []
         for i in range(24628):
